@@ -85,6 +85,18 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://smart-condominio-parcial-1-si-2.vercel.app",
+]
+
+# (opcional para evitar problemas de preflight en móviles)
+CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://smart-condominio-parcial-1-si-2.vercel.app",
+]
+
 # === URLs / WSGI ===
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
