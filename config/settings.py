@@ -75,8 +75,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 # === Middleware (orden recomendado) ===
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # <- CORS antes de CommonMiddleware
+     "corsheaders.middleware.CorsMiddleware", 
+    "django.middleware.security.SecurityMiddleware",  # <- CORS antes de CommonMiddleware
     "django.middleware.common.CommonMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -88,6 +88,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "https://smart-condominio-parcial-1-si-2.vercel.app",
 ]
+
+# (opcional) permite todos los previews *.vercel.app
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://.*\.vercel\.app$"]
 
 # (opcional para evitar problemas de preflight en móviles)
 CORS_ALLOW_HEADERS = ["*"]
