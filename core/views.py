@@ -1,49 +1,70 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny  # durante el desarrollo
-from .models import AreasComunes, Conversacion, Cuotas, EventosSeguridad, Mantenimientos, Mensaje, Notificacion, Pagos, Reservas, Residencias, Usuario, Rol, Vehiculo
-from .serializers import UsuarioSerializer, RolSerializer, VehiculoSerializer, AreasComunesSerializer, ReservasSerializer, ResidenciasSerializer, CuotasSerializer, PagosSerializer, MantenimientosSerializer, EventosSeguridadSerializer, NotificacionSerializer, ConversacionSerializer, MensajeSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import ValidationError
 
-from core import serializers
+from .models import (
+    AreasComunes, Conversacion, Cuotas, EventosSeguridad,
+    Mantenimientos, Mensaje, Notificacion, Pagos, Reservas,
+    Residencias, Usuario, Rol, Vehiculo
+)
+from .serializers import (
+    UsuarioSerializer, RolSerializer, VehiculoSerializer,
+    AreasComunesSerializer, ReservasSerializer, ResidenciasSerializer,
+    CuotasSerializer, PagosSerializer, MantenimientosSerializer,
+    EventosSeguridadSerializer, NotificacionSerializer,
+    ConversacionSerializer, MensajeSerializer
+)
+
+
+# =============================
+# ROLES Y USUARIOS
+# =============================
 
 class RolViewSet(viewsets.ModelViewSet):
     queryset = Rol.objects.all().order_by("id")
     serializer_class = RolSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # cambiar a IsAuthenticated en producción
+
 
 class UsuarioViewSet(viewsets.ModelViewSet):
+    queryset = Usuario.objects.all().select_related("rol").order_by("id")
     serializer_class = UsuarioSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # cambiar a IsAuthenticated en producción
     filter_backends = [filters.SearchFilter]
     search_fields = ["nombre_completo", "ci", "email"]
 
-    def get_queryset(self):
-        # Para devolver siempre el rol anidado sin consultas extras
-        return Usuario.objects.select_related("rol").order_by("id")
-
     @action(detail=True, methods=["patch"])
     def activar(self, request, pk=None):
-        u = self.get_object(); u.activo = True; u.save()
+        u = self.get_object()
+        u.activo = True
+        u.save()
         return Response(self.get_serializer(u).data)
 
     @action(detail=True, methods=["patch"])
     def desactivar(self, request, pk=None):
-        u = self.get_object(); u.activo = False; u.save()
+        u = self.get_object()
+        u.activo = False
+        u.save()
         return Response(self.get_serializer(u).data)
-    
-    
+
+
+# =============================
+# RESTO DE ENTIDADES
+# =============================
 
 class VehiculoViewSet(viewsets.ModelViewSet):
     queryset = Vehiculo.objects.all()
     serializer_class = VehiculoSerializer
     permission_classes = [IsAuthenticated]
 
+
 class AreasComunesViewSet(viewsets.ModelViewSet):
     queryset = AreasComunes.objects.all()
     serializer_class = AreasComunesSerializer
     permission_classes = [IsAuthenticated]
+
 
 class ReservasViewSet(viewsets.ModelViewSet):
     queryset = Reservas.objects.all()
@@ -68,9 +89,10 @@ class ReservasViewSet(viewsets.ModelViewSet):
         ).exists()
 
         if conflicto:
-            raise serializers.ValidationError("El área ya está reservada en ese horario.")
+            raise ValidationError("El área ya está reservada en ese horario.")
 
         serializer.save(usuario=self.request.user)
+
 
 class ResidenciasViewSet(viewsets.ModelViewSet):
     queryset = Residencias.objects.all()
@@ -86,6 +108,7 @@ class ResidenciasViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 
+
 class CuotasViewSet(viewsets.ModelViewSet):
     queryset = Cuotas.objects.all()
     serializer_class = CuotasSerializer
@@ -99,6 +122,7 @@ class CuotasViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+
 
 class PagosViewSet(viewsets.ModelViewSet):
     queryset = Pagos.objects.all()
@@ -118,6 +142,7 @@ class PagosViewSet(viewsets.ModelViewSet):
             cuota.estado = 'pagado'
             cuota.save()
 
+
 class MantenimientosViewSet(viewsets.ModelViewSet):
     queryset = Mantenimientos.objects.all()
     serializer_class = MantenimientosSerializer
@@ -126,6 +151,7 @@ class MantenimientosViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 
+
 class EventosSeguridadViewSet(viewsets.ModelViewSet):
     queryset = EventosSeguridad.objects.all()
     serializer_class = EventosSeguridadSerializer
@@ -133,6 +159,7 @@ class EventosSeguridadViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+
 
 class NotificacionViewSet(viewsets.ModelViewSet):
     queryset = Notificacion.objects.all()
@@ -145,6 +172,7 @@ class NotificacionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 
+
 class ConversacionViewSet(viewsets.ModelViewSet):
     queryset = Conversacion.objects.all()
     serializer_class = ConversacionSerializer
@@ -152,6 +180,7 @@ class ConversacionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+
 
 class MensajeViewSet(viewsets.ModelViewSet):
     queryset = Mensaje.objects.all()

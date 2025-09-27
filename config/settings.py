@@ -1,10 +1,10 @@
-
 """
 Django settings for config project.
 """
 
 from pathlib import Path
 import os
+from corsheaders.defaults import default_headers  # 👈 import necesario
 
 # === Paths ===
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,13 +12,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # === Seguridad / Entorno ===
 SECRET_KEY = os.getenv("SECRET_KEY", "solo-para-dev-no-usar-en-prod")
 DEBUG = os.getenv("DEBUG", "True") == "True"  # en dev: True
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS",
-                          "127.0.0.1,localhost,[::1],smart-condominio-parcial-1-si-2.vercel.app"
-                          ).split(",")
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "127.0.0.1,localhost,[::1],smart-condominio-parcial-1-si-2.vercel.app"
+).split(",")
 
 # === Apps ===
 INSTALLED_APPS = [
-    # Terceros (coloca corsheaders una sola vez)
+    # Terceros
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
@@ -37,7 +38,7 @@ INSTALLED_APPS = [
 
 # === Middleware (orden recomendado) ===
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",              # CORS PRIMERO
+    "corsheaders.middleware.CorsMiddleware",  # CORS primero
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -58,7 +59,6 @@ REST_FRAMEWORK = {
 }
 
 # === CORS / CSRF ===
-# Para dev local y para tu preview en Vercel
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -66,11 +66,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://smart-condominio-parcial-1-si-2.vercel.app",
 ]
-# opcional: permitir todos los subdominios *.vercel.app (solo si lo necesitas)
 CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://.*\.vercel\.app$"]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ["*"]
+
+# 👇 incluimos explícitamente los headers necesarios
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "content-type",
+    "x-csrftoken",
+]
+
 CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
 
 CSRF_TRUSTED_ORIGINS = [
