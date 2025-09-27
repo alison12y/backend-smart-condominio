@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Tu API (routers/viewsets están en core/urls.py)
-    path('api/', include('core.urls')),
+     path('api/', include('core.urls')),
 
     # Auth JWT
     path("api/login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
